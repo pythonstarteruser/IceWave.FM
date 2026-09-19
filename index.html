@@ -83,31 +83,66 @@
     </div>
 
     <script>
-        const radio = document.getElementById("radio");
-        const playButton = document.getElementById("playButton");
-        const volume = document.getElementById("volume");
-        const status = document.getElementById("status");
+    const radio = document.getElementById("radio");
+    const playButton = document.getElementById("playButton");
+    const volume = document.getElementById("volume");
+    const status = document.getElementById("status");
 
-        playButton.addEventListener("click", () => {
-            if (radio.paused) {
-                radio.play();
+    let reconnectTimer = null;
+    let userStopped = true;
+
+    playButton.addEventListener("click", async () => {
+        if (radio.paused) {
+            userStopped = false;
+
+            try {
+                await radio.play();
                 playButton.textContent = "⏸️ Pause";
                 status.textContent = "📻 Gra IceWave.FM";
-            } else {
-                radio.pause();
-                playButton.textContent = "▶️ Play";
-                status.textContent = "Zatrzymano";
+            } catch (error) {
+                status.textContent = "❌ Nie udało się uruchomić streamu";
             }
-        });
+        } else {
+            userStopped = true;
+            radio.pause();
 
-        volume.addEventListener("input", () => {
-            radio.volume = volume.value;
-        });
+            playButton.textContent = "▶️ Play";
+            status.textContent = "Zatrzymano";
+        }
+    });
 
-        radio.addEventListener("error", () => {
-            status.textContent = "❌ Nie można połączyć ze streamem";
-        });
-    </script>
+    volume.addEventListener("input", () => {
+        radio.volume = volume.value;
+    });
+
+    function reconnect() {
+        if (userStopped) return;
+
+        if (reconnectTimer) {
+            clearTimeout(reconnectTimer);
+        }
+
+        status.textContent = "🔄 Łączenie z IceWave.FM...";
+
+        reconnectTimer = setTimeout(async () => {
+            try {
+                radio.load();
+                await radio.play();
+
+                playButton.textContent = "⏸️ Pause";
+                status.textContent = "📻 Gra IceWave.FM";
+            } catch (error) {
+                status.textContent = "⏳ Stream niedostępny — ponawiam...";
+                reconnect();
+            }
+        }, 1500);
+    }
+
+    radio.addEventListener("ended", reconnect);
+    radio.addEventListener("error", reconnect);
+    radio.addEventListener("stalled", reconnect);
+    radio.addEventListener("abort", reconnect);
+</script>
 
 </body>
 </html>
