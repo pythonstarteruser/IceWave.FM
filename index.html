@@ -1,0 +1,114 @@
+```html
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IceWave.FM</title>
+
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #111827;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .radio {
+            text-align: center;
+            padding: 40px;
+            border-radius: 20px;
+            background: #1f2937;
+            width: min(90%, 500px);
+        }
+
+        h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            color: #9ca3af;
+            margin-bottom: 30px;
+        }
+
+        button {
+            font-size: 20px;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        input[type="range"] {
+            width: 200px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="radio">
+        <h1>❄️ IceWave.FM</h1>
+
+        <div class="status" id="status">
+            Gotowe do odtwarzania
+        </div>
+
+        <audio id="radio" preload="none">
+            <source
+                src="http://192.168.1.63:8000/radio.mp3"
+                type="audio/mpeg">
+        </audio>
+
+        <button id="playButton">▶️ Play</button>
+
+        <br>
+
+        <label>
+            🔊
+            <input
+                id="volume"
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value="1">
+        </label>
+    </div>
+
+    <script>
+        const radio = document.getElementById("radio");
+        const playButton = document.getElementById("playButton");
+        const volume = document.getElementById("volume");
+        const status = document.getElementById("status");
+
+        playButton.addEventListener("click", () => {
+            if (radio.paused) {
+                radio.play();
+                playButton.textContent = "⏸️ Pause";
+                status.textContent = "📻 Gra IceWave.FM";
+            } else {
+                radio.pause();
+                playButton.textContent = "▶️ Play";
+                status.textContent = "Zatrzymano";
+            }
+        });
+
+        volume.addEventListener("input", () => {
+            radio.volume = volume.value;
+        });
+
+        radio.addEventListener("error", () => {
+            status.textContent = "❌ Nie można połączyć ze streamem";
+        });
+    </script>
+
+</body>
+</html>
+```
